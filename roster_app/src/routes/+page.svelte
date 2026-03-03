@@ -1,0 +1,281 @@
+<script>
+    let roster = {
+        "team 1": ["Xeon", "HenTieFukada", "Hakaijin", "乐童儿 (TongTong)", "Shokyute"],
+        "team 2": ["Jaeh", "Shatian", "HahahaxD", "Ares Targaryen", "Haku"],
+        "team 3": ["astro ★", "Sangka", "厄Jinx运", "PLACEHOLDER", "scarlet"],
+        "team 4": ["FriendlyBandit", "Dosed", "Yuèfengshé", "Lilith (Hades)", "Silly (Shu-Ngaa)"],
+        "team 5": ["MindlessWanderer", "Noills", "KingBreaker", "PandaStick (Rarest)", "Duduxai"],
+        "team 6": ["CynicalInsight", "PLACEHOLDER", "YooSeo-yeon", "Entropy", "Shurisan"]
+    };
+
+    let roles = {
+        "team 1": ["Mo + Dual Blade", "Mo + Tank Spear", "Nameless", "Healer", "Healer"],
+        "team 2": ["Mo + Dual Blade", "Mo + Tank Spear", "Nameless", "Nameless", "Healer"],
+        "team 3": ["Mo + Fan", "Nameless", "Nameless", "Nameless", "Healer"],
+        "team 4": ["Mo + Fan", "Nameless", "Nameless", "Healer", "Healer"],
+        "team 5": ["Mo + Dual Blade", "Mo + Tank Spear", "Nameless", "Fanbrella", "Healer"],
+        "team 6": ["Mo + Dual Blade", "99", "99", "Nameless", "Healer"]
+    };
+
+    let rotation = {
+        "team 1": ["Suck 1, Antiheal 1", "Suck 2", "", "", ""],
+        "team 2": ["Suck 3, Antiheal 2", "", "", ""],
+        "team 3": ["Suck 4", "", "", "", ""],
+        "team 4": ["", "", "", "", ""],
+        "team 5": ["", "", "", "", ""],
+        "team 6": ["", "", "", "", ""]
+    };
+
+    const colorMap = new Map();
+    colorMap.set("Mo + Dual Blade", "#f5a742")
+    colorMap.set("Mo + Tank Spear", "#f5a742")
+    colorMap.set("Mo + Fan", "#f5a742")
+    colorMap.set("Healer", "#35db53")
+    colorMap.set("Nameless", "#f54542")
+    colorMap.set("Fanbrella", "#f54542")
+    colorMap.set("99", "#f54542")
+
+    const leftTeams = ["team 1", "team 2", "team 3"];
+    const rightTeams = ["team 4", "team 5", "team 6"];
+
+    const rsvpRoles = ["tank", "damage", "healer", "tentative", "declined"];
+    const rsvpStatus = {};
+    $: rowCount = 0;
+    let tableBuckets = {
+        tank: [],
+        damage: [],
+        healer: [],
+        tentative: [],
+        declined: []
+    };
+    function apolloPaste(event) {
+        const apollo_data = event.target.value;
+        const lines = apollo_data.split("\n");
+        const buckets = {};
+        let currentRole = null;
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            if (line.startsWith(":")) {
+                currentRole = line.split(":")[1].trim();
+                if (!buckets[currentRole]) {
+                    buckets[currentRole] = [];
+                }
+            } else if (currentRole) {
+                buckets[currentRole].push(line);
+            }
+        }
+
+        const maxLen = Math.max(...Object.values(buckets).map(arr => arr.length));
+
+        for (const role in buckets) {
+            for (const mem_idx in buckets[role]){
+                let member = buckets[role][mem_idx];
+                
+                if (role == "tentative"){
+                    rsvpStatus[member] = "#8d5ab0"
+                }else if (role == "declined"){
+                    rsvpStatus[member] = "#b0454c"
+                }else{
+                    rsvpStatus[member] = "#84c284"
+                }
+            }
+            while (buckets[role].length < maxLen) {
+                buckets[role].push("");
+            }
+        }
+        
+        tableBuckets = buckets;
+        rowCount = maxLen;
+    }
+
+    let table1, table2;
+    async function copyTable(tableElement) {
+        const html = tableElement.outerHTML;
+        const text = tableElement.innerText;
+
+        const htmlBlob = new Blob([html], { type: "text/html" });
+        const textBlob = new Blob([text], { type: "text/plain" });
+
+        const data = [
+            new ClipboardItem({
+                "text/html": htmlBlob,
+                "text/plain": textBlob
+            })
+        ];
+
+        await navigator.clipboard.write(data);
+    }
+
+    function handleDragStart(e, text, color) {
+        const data = JSON.stringify({ text, color });
+        console.log(data);
+        
+        e.dataTransfer.setData("application/json", data);
+        e.dataTransfer.dropEffect = "copy";
+    }
+
+    function handleDrop(e, team, memberIdx) {
+        e.preventDefault();
+        const rawData = e.dataTransfer.getData("application/json");
+        if (!rawData) return;
+
+        const { text, color } = JSON.parse(rawData);
+        roster[team][memberIdx] = text;
+    }
+</script>
+
+<div class="in_wrap">
+    <div style="margin-left: auto; margin-right: auto;">Apollo Paste</div>
+    <textarea name="apollo" id="apollo" on:input={apolloPaste}></textarea>
+    <div id="table_container">
+        <table bind:this={table1}>
+            <thead>
+                <tr>
+                    <th>Build</th><th>Rotation</th><th>Member</th>
+                    <th>Build</th><th>Rotation</th><th>Member</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each [0,1,2] as i}
+                    <tr style="background-color: #f0f0f0;">
+                        <td style="text-align: center;" colspan="3"><strong>{leftTeams[i].toUpperCase()}</strong></td>
+                        <td style="text-align: center;" colspan="3"><strong>{rightTeams[i].toUpperCase()}</strong></td>
+                    </tr>
+
+                    {#each [0, 1, 2, 3, 4] as memberIdx}
+                        <tr>
+                            <td style="background-color: {colorMap.get(roles[leftTeams[i]][memberIdx])}">{roles[leftTeams[i]][memberIdx]}</td>
+                            <td>{rotation[leftTeams[i]][memberIdx]}</td>
+                            <td 
+                                on:dragover|preventDefault
+                                on:drop={(e) => handleDrop(e, leftTeams[i], memberIdx)}
+                                style="background-color: {rsvpStatus[roster[leftTeams[i]][memberIdx]]};"
+                            >
+                                {roster[leftTeams[i]][memberIdx]}
+                            </td>
+
+                            <td style="background-color: {colorMap.get(roles[rightTeams[i]][memberIdx])}">{roles[rightTeams[i]][memberIdx]}</td>
+                            <td>{rotation[rightTeams[i]][memberIdx]}</td>
+                            <td 
+                                on:dragover|preventDefault
+                                on:drop={(e) => handleDrop(e, rightTeams[i], memberIdx)}
+                                style="background-color: {rsvpStatus[roster[rightTeams[i]][memberIdx]]};"
+                            >
+                                {roster[rightTeams[i]][memberIdx]}
+                            </td>                        
+                        </tr>
+                    {/each}
+                {/each}
+            </tbody>
+        </table>
+        <button on:click={() => copyTable(table1)} style="padding: 10px; cursor: pointer;">
+            Copy Table
+        </button>
+    </div>
+</div>
+<div id="rsvpContainer">
+    <div id="rsvp">
+        {#if rowCount > 0}
+            <table bind:this={table2}>
+                <thead>
+                    <tr>
+                        <th>Tank</th>
+                        <th>Damage</th>
+                        <th>Healer</th>
+                        <th>Tentative</th>
+                        <th>Declined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each Array(rowCount) as _,i}
+                        <tr>
+                            {#each rsvpRoles as role}
+                                <td 
+                                    draggable="true"
+                                    on:dragstart={(e) => handleDragStart(e, tableBuckets[role][i], rsvpStatus[tableBuckets[role][i]])}
+                                    style="background-color: {rsvpStatus[tableBuckets[role][i]]}; cursor: grab;"
+                                >
+                                    {tableBuckets[role][i]}
+                                </td>
+                            {/each}
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+            <button on:click={() => copyTable(table2)} style="padding: 10px; cursor: pointer;">
+                Copy Table
+            </button>
+        {:else}
+            <p>RSVP Will Generate Here On Paste</p>
+        {/if}
+    </div>
+</div>
+
+<style>
+    .in_wrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1ch;
+    }
+
+    #rsvpContainer{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1ch;
+    }
+
+    #rsvp{
+        display: flex;
+        margin-left: 25ch;
+    }
+
+    #apollo{
+        width: 30ch;
+        height: 30ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    table {
+        border-collapse: collapse;
+        border: 2px solid rgb(140 140 140);
+        font-family: sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    #table_container{
+        display: flex;
+        margin-left: 25ch;
+    }
+
+    button{
+        height: 6ch;
+        width: 15ch;
+        text-align: center;
+        margin: auto;
+    }
+
+    thead,
+    th,
+    td {
+    border: 1px solid rgb(160 160 160);
+    padding: 8px 10px;
+    }
+
+    td:last-of-type {
+    text-align: center;
+    }
+
+    tbody > tr:nth-of-type(even) {
+    background-color: rgb(237 238 242);
+    }
+
+</style>
