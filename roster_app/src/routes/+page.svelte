@@ -18,9 +18,9 @@
     };
 
     let rotation = {
-        "team 1": ["Suck 1, Antiheal 1", "Suck 2", "", "", ""],
-        "team 2": ["Suck 3, Antiheal 2", "", "", ""],
-        "team 3": ["Suck 4", "", "", "", ""],
+        "team 1": ["Suck 1, Antiheal 1", "Suck 2", "Shield 1", "Heal 1", "Heal 2"],
+        "team 2": ["Suck 3, Antiheal 2", "Suck 4", "Shield 2", "Shield 3", "Heal 3"],
+        "team 3": ["Suck 5", "Shield 4", "Shield 5", "Shield 6", "Heal 4"],
         "team 4": ["", "", "", "", ""],
         "team 5": ["", "", "", "", ""],
         "team 6": ["", "", "", "", ""]
@@ -125,6 +125,28 @@
         const { text, color } = JSON.parse(rawData);
         roster[team][memberIdx] = text;
     }
+
+    function removeRostered(){
+        const rosteredMembers = new Set()
+        rosteredMembers.add("")
+        for (const team in roster){
+            for (const member in roster[team]){
+                rosteredMembers.add(roster[team][member])
+            }
+        }
+        
+        for (const team in tableBuckets) {
+            tableBuckets[team] = tableBuckets[team].filter(member => !rosteredMembers.has(member));
+        }
+
+        const maxLen = Math.max(...Object.values(tableBuckets).map(arr => arr.length));
+        rowCount = maxLen;
+        for (const role in tableBuckets) {
+            while (tableBuckets[role].length < maxLen) {
+                tableBuckets[role].push("");
+            }
+        }        
+    }
 </script>
 
 <div class="in_wrap">
@@ -177,7 +199,7 @@
     </div>
 </div>
 <div id="rsvpContainer">
-    <div id="rsvp">
+    <div id="rsvp" class:rsvp_filled={rowCount > 0}>
         {#if rowCount > 0}
             <table bind:this={table2}>
                 <thead>
@@ -205,9 +227,15 @@
                     {/each}
                 </tbody>
             </table>
-            <button on:click={() => copyTable(table2)} style="padding: 10px; cursor: pointer;">
-                Copy Table
-            </button>
+            <div id="button-wrapper">
+                <button on:click={() => copyTable(table2)} style="padding: 10px; cursor: pointer;">
+                    Copy Table
+                </button>
+                <button on:click={removeRostered} style="padding: 10px; cursor: pointer;">
+                    Remove Rostered
+                </button>
+            </div>
+            
         {:else}
             <p>RSVP Will Generate Here On Paste</p>
         {/if}
@@ -215,6 +243,18 @@
 </div>
 
 <style>
+    #button-wrapper{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #button-wrapper>button{
+        margin-top: 0px;
+        margin-bottom: 10px;
+    }
+
     .in_wrap {
         display: flex;
         flex-direction: column;
@@ -233,6 +273,9 @@
 
     #rsvp{
         display: flex;
+    }
+
+    .rsvp_filled{
         margin-left: 25ch;
     }
 
@@ -257,7 +300,7 @@
     }
 
     button{
-        height: 6ch;
+        height: 10ch;
         width: 15ch;
         text-align: center;
         margin: auto;
