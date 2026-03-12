@@ -48,6 +48,9 @@
         tentative: [],
         declined: []
     };
+
+    const globalRoles = {};
+
     function apolloPaste(event) {
         const apollo_data = event.target.value;
         const lines = apollo_data.split("\n");
@@ -74,12 +77,14 @@
             for (const mem_idx in buckets[role]){
                 let member = buckets[role][mem_idx];
                 
+                globalRoles[member] = role;
+                
                 if (role == "tentative"){
                     rsvpStatus[member] = "#8d5ab0"
                 }else if (role == "declined"){
                     rsvpStatus[member] = "#b0454c"
                 }else{
-                    rsvpStatus[member] = "#84c284"
+                    rsvpStatus[member] = "#80b4f2"
                 }
             }
             while (buckets[role].length < maxLen) {
@@ -109,9 +114,8 @@
         await navigator.clipboard.write(data);
     }
 
-    function handleDragStart(e, text, color) {
+    function handleDragStart(e, text, color, role) {
         const data = JSON.stringify({ text, color });
-        console.log(data);
         
         e.dataTransfer.setData("application/json", data);
         e.dataTransfer.dropEffect = "copy";
@@ -121,9 +125,36 @@
         e.preventDefault();
         const rawData = e.dataTransfer.getData("application/json");
         if (!rawData) return;
+        
+        const prev_member = roster[team][memberIdx]
 
         const { text, color } = JSON.parse(rawData);
         roster[team][memberIdx] = text;
+        
+        let role = null;
+        if(prev_member in globalRoles){
+            role = globalRoles[prev_member];
+        }
+
+        let tempTableBuckets = {}
+        
+        for (const role in tableBuckets){
+            tempTableBuckets[role] = tableBuckets[role].filter(item => item !== "");
+            tempTableBuckets[role] = tempTableBuckets[role].filter(item => item !== text);
+        }
+        
+        if (prev_member in globalRoles){
+            tempTableBuckets[role].push(prev_member)
+        }
+        
+        const maxLen = Math.max(...Object.values(tempTableBuckets).map(arr => arr.length));
+        rowCount = maxLen;
+        for (const role in tempTableBuckets) {
+            while (tempTableBuckets[role].length < maxLen) {
+                tempTableBuckets[role].push("");
+            }
+        }
+        tableBuckets = tempTableBuckets
     }
 
     function removeRostered(){
@@ -145,7 +176,39 @@
             while (tableBuckets[role].length < maxLen) {
                 tableBuckets[role].push("");
             }
-        }        
+        }                
+    }
+
+    function moveMemberToFill(member, team){
+        let memberRole = null;
+        if(member in globalRoles){
+            memberRole = globalRoles[member];
+        }
+        
+        let rosterIdx = roster[team].indexOf(member);
+        roster[team][rosterIdx] = "PLACEHOLDER";
+
+        let tempTableBuckets = {};
+        for (const role in tableBuckets){
+            tempTableBuckets[role] = tableBuckets[role].filter(item => item !== "");
+        }
+        
+        if (member in globalRoles){
+            if(!(member in tempTableBuckets[memberRole])){
+                tempTableBuckets[memberRole].push(member);
+                console.log("not here?");
+                
+            } 
+        }
+
+        const maxLen = Math.max(...Object.values(tempTableBuckets).map(arr => arr.length));
+        rowCount = maxLen;        
+        for (const role in tempTableBuckets) {
+            while (tempTableBuckets[role].length < maxLen) {
+                tempTableBuckets[role].push("");
+            }
+        }
+        tableBuckets = tempTableBuckets;
     }
 </script>
 
@@ -174,6 +237,7 @@
                             <td 
                                 on:dragover|preventDefault
                                 on:drop={(e) => handleDrop(e, leftTeams[i], memberIdx)}
+                                on:dblclick={() => moveMemberToFill(roster[leftTeams[i]][memberIdx], leftTeams[i])}
                                 style="background-color: {rsvpStatus[roster[leftTeams[i]][memberIdx]]};"
                             >
                                 {roster[leftTeams[i]][memberIdx]}
@@ -184,6 +248,7 @@
                             <td 
                                 on:dragover|preventDefault
                                 on:drop={(e) => handleDrop(e, rightTeams[i], memberIdx)}
+                                on:dblclick={() => moveMemberToFill(roster[rightTeams[i]][memberIdx], rightTeams[i])}
                                 style="background-color: {rsvpStatus[roster[rightTeams[i]][memberIdx]]};"
                             >
                                 {roster[rightTeams[i]][memberIdx]}
@@ -217,7 +282,7 @@
                             {#each rsvpRoles as role}
                                 <td 
                                     draggable="true"
-                                    on:dragstart={(e) => handleDragStart(e, tableBuckets[role][i], rsvpStatus[tableBuckets[role][i]])}
+                                    on:dragstart={(e) => handleDragStart(e, tableBuckets[role][i], rsvpStatus[tableBuckets[role][i]], role)}
                                     style="background-color: {rsvpStatus[tableBuckets[role][i]]}; cursor: grab;"
                                 >
                                     {tableBuckets[role][i]}
