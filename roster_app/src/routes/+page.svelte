@@ -26,14 +26,18 @@
         "team 6": ["", "", "", "", ""]
     };
 
+    const tank = "#ffbf69";
+    const dps = "#f25c54";
+    const healer = "#92e6a7";
+
     const colorMap = new Map();
-    colorMap.set("Mo + Dual Blade", "#f5a742")
-    colorMap.set("Mo + Tank Spear", "#f5a742")
-    colorMap.set("Mo + Fan", "#f5a742")
-    colorMap.set("Healer", "#35db53")
-    colorMap.set("Nameless", "#f54542")
-    colorMap.set("Fanbrella", "#f54542")
-    colorMap.set("99", "#f54542")
+    colorMap.set("Mo + Dual Blade", tank)
+    colorMap.set("Mo + Tank Spear", tank)
+    colorMap.set("Mo + Fan", tank)
+    colorMap.set("Healer", healer)
+    colorMap.set("Nameless", dps)
+    colorMap.set("Fanbrella", dps)
+    colorMap.set("99", dps)
 
     const leftTeams = ["team 1", "team 2", "team 3"];
     const rightTeams = ["team 4", "team 5", "team 6"];
@@ -80,11 +84,11 @@
                 globalRoles[member] = role;
                 
                 if (role == "tentative"){
-                    rsvpStatus[member] = "#8d5ab0"
+                    rsvpStatus[member] = "#c599f2"
                 }else if (role == "declined"){
-                    rsvpStatus[member] = "#b0454c"
+                    rsvpStatus[member] = "#d48383"
                 }else{
-                    rsvpStatus[member] = "#80b4f2"
+                    rsvpStatus[member] = "#99b4f2"
                 }
             }
             while (buckets[role].length < maxLen) {
