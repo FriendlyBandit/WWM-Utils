@@ -1,11 +1,11 @@
 <script>
     let roster = {
-        "team 1": ["Xeon", "HenTieFukada", "Hakaijin", "乐童儿 (TongTong)", "Shokyute"],
-        "team 2": ["Jaeh", "Shatian", "HahahaxD", "Ares Targaryen", "Haku"],
-        "team 3": ["astro ★", "Sangka", "厄Jinx运", "PLACEHOLDER", "scarlet"],
+        "team 1": ["Xeon", "astro ★", "Hakaijin", "Haku", "Shokyute"],
+        "team 2": ["Jaeh", "Shatian", "HahahaxD", "Ares Targaryen", "雲白 (Cloud)"],
+        "team 3": ["ThresherOfSouls", "Sangka", "Peachtea", "厄Jinx运", "scarlet"],
         "team 4": ["FriendlyBandit", "Dosed", "Yuèfengshé", "Lilith (Hades)", "Silly (Shu-Ngaa)"],
-        "team 5": ["MindlessWanderer", "Noills", "KingBreaker", "PandaStick (Rarest)", "Duduxai"],
-        "team 6": ["CynicalInsight", "PLACEHOLDER", "YooSeo-yeon", "Entropy", "Shurisan"]
+        "team 5": ["MindlessWanderer", "Noills", "Leesh", "Choloepus", "Arael"],
+        "team 6": ["Entropy", "J Cobain", "Miso", "Kow", "Duduxai"]
     };
 
     let roles = {
