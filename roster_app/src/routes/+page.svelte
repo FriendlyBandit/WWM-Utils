@@ -2,19 +2,19 @@
     let roster = {
         "team 1": ["Xeon", "astro ★", "𝕸ï𝖘𝖔", "Starlit-Qin", "Shokyute (realest)"],
         "team 2": ["Jaeh", "Shatian", "Ares Targaryen", "XxLivius1xX", "雲白 (Cloud)"],
-        "team 3": ["ThresherOfSouls", "stayquiet", "Peachtea", "厄Jinx运", "Zinnia"],
-        "team 4": ["FriendlyBandit", "Dosed", "Yuèfengshé", "Lilith (Hades)", "Silly (Shu-Ngaa)"],
-        "team 5": ["MindlessWanderer", "Noills", "Leesh", "Choloepus", "Duduxai"],
-        "team 6": ["J Cobain", "Jun", "YooSeo-yeon", "STAR", "Shurisan"]
+        "team 3": ["ThresherOfSouls", "stayquiet", "STAR", "厄Jinx运", "Zinnia"],
+        "team 4": ["FriendlyBandit", "Sangka", "Yuèfengshé", "Lilith (Hades)", "Silly (Shu-Ngaa)"],
+        "team 5": ["Moika", "Noills", "Leesh", "Choloepus", "Duduxai"],
+        "team 6": ["J Cobain", "Peachtea", "monger", "Shurisan", "scarlet"]
     };
 
     let roles = {
         "team 1": ["Mo + Dual Blade", "Mo + Tank Spear", "Nameless", "Healer", "Healer"],
         "team 2": ["Mo + Dual Blade", "Mo + Tank Spear", "Nameless", "Nameless", "Healer"],
         "team 3": ["Mo + Fan", "Nameless", "Nameless", "Nameless", "Healer"],
-        "team 4": ["Mo + Fan", "Nameless", "Nameless", "Nameless", "Healer"],
+        "team 4": ["Mo + Fan", "Nameless", "Nameless", "Healer", "Healer"],
         "team 5": ["Mo + Dual Blade", "Mo + Tank Spear", "Nameless", "Dust", "Healer"],
-        "team 6": ["Mo + Dual Blade", "99", "Nameless", "Nameless", "Healer"]
+        "team 6": ["Mo + Tang Dao", "99", "Nameless", "Nameless", "Healer"]
     };
 
     let rotation = {
@@ -33,6 +33,7 @@
     const colorMap = new Map();
     colorMap.set("Mo + Dual Blade", tank)
     colorMap.set("Mo + Tank Spear", tank)
+    colorMap.set("Mo + Tang Dao", tank)
     colorMap.set("Mo + Fan", tank)
     colorMap.set("Healer", healer)
     colorMap.set("Nameless", dps)
